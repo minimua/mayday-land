@@ -1,41 +1,28 @@
-import { MongoClient } from 'mongodb';
-import { Lyric } from './types';
+import { MongoClient, Collection, Document } from 'mongodb';
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please add your Mongodb URI to .env.local');
-}
-
-const uri = process.env.MONGODB_URI;
-const options = {
-  // 简化连接选项
-  serverSelectionTimeoutMS: 5000,
-  connectTimeoutMS: 10000,
-  // 只保留必要的 SSL 选项
-  ssl: true,
-  tls: true,
-} as const;
+const uri = process.env.MONGODB_URI || '';
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
+// 定义一个全局接口
+interface GlobalWithMongo {
+  _mongoClientPromise?: Promise<MongoClient>;
+}
+
 if (process.env.NODE_ENV === 'development') {
-  if (!(global as any)._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    (global as any)._mongoClientPromise = client.connect();
+  if (!(global as GlobalWithMongo)._mongoClientPromise) {
+    client = new MongoClient(uri);
+    (global as GlobalWithMongo)._mongoClientPromise = client.connect();
   }
-  clientPromise = (global as any)._mongoClientPromise;
+  clientPromise = (global as GlobalWithMongo)._mongoClientPromise!;
 } else {
-  client = new MongoClient(uri, options);
+  client = new MongoClient(uri);
   clientPromise = client.connect();
 }
 
-export async function getLyricsCollection() {
-  try {
-    const client = await clientPromise;
-    const db = client.db('mayday-land');
-    return db.collection<Lyric>('lyrics');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    throw error;
-  }
+export async function getLyricsCollection(): Promise<Collection<Document>> {
+  const client = await clientPromise;
+  const db = client.db('mayday-land');
+  return db.collection<Document>('lyrics');
 }

@@ -27,13 +27,11 @@
 
 1. 克隆项目
 ```bash
-git clone [[项目地址]](https://github.com/minimua/mayday-land)
+git clone https://github.com/minimua/mayday-land
 ```
 2. 安装依赖
 ```bash 
 npm install
-# 或
-yarn install
 ```
 3. 环境配置
 ``` bash
@@ -45,8 +43,6 @@ MONGODB_URI=你的MongoDB连接串
 5. 运行项目
 ```bash
 npm run dev
-# 或
-yarn dev
 ```
 API 使用
 1.随机获取歌词
